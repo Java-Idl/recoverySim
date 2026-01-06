@@ -26,10 +26,13 @@ const app = {
         if (s) {
             app.settings = JSON.parse(s);
         } else {
-            // Auto Theme: Check system preference
+            // Default to Light Mode (User Request)
+            app.settings.theme = 'light';
+            /* 
             if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
                 app.settings.theme = 'dark';
-            }
+            } 
+            */
         }
 
         // Sync UI
