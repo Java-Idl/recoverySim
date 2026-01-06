@@ -27,11 +27,11 @@ const app = {
         if (s) {
             app.settings = JSON.parse(s);
             // Default tone if missing
-            if (!app.settings.tone) app.settings.tone = 'sarcastic';
+            if (!app.settings.tone) app.settings.tone = 'professional';
         } else {
             // Default to Light Mode (User Request)
             app.settings.theme = 'light';
-            app.settings.tone = 'sarcastic';
+            app.settings.tone = 'professional';
         }
 
         // Sync UI
@@ -48,7 +48,7 @@ const app = {
         if (sEl) sEl.value = app.settings.sort || 'risk';
 
         const tnEl = document.getElementById('in-tone');
-        if (tnEl) tnEl.value = app.settings.tone || 'sarcastic';
+        if (tnEl) tnEl.value = app.settings.tone || 'professional';
 
         const diff = new Date(app.config.semEndDate) - new Date();
         const daysLeft = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
@@ -92,7 +92,7 @@ const app = {
     },
 
     applyTone: () => {
-        const t = app.settings.tone || 'sarcastic';
+        const t = app.settings.tone || 'professional';
 
         // Static UI Updates
         const map = {
@@ -162,7 +162,7 @@ const app = {
         document.getElementById('in-id').value = id || '';
         document.getElementById('btn-del').style.display = isEdit ? 'block' : 'none';
 
-        const t = app.settings.tone || 'sarcastic';
+        const t = app.settings.tone || 'professional';
 
         if (isEdit) {
             const sub = app.data.find(s => s.id == id);
