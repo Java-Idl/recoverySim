@@ -1,10 +1,11 @@
 import { Logic } from './logic.js';
 import { ui } from './ui.js';
+import { Tone } from './tone.js';
 
 /* --- APPLICATION STATE --- */
 const app = {
     data: [],
-    settings: { target: 75, theme: 'light', sort: 'risk' },
+    settings: { target: 75, theme: 'light', sort: 'risk', tone: 'sarcastic' },
     vizState: [],
     currId: null,
     config: null, // Will be loaded from JSON
@@ -25,14 +26,12 @@ const app = {
         if (d) app.data = JSON.parse(d);
         if (s) {
             app.settings = JSON.parse(s);
+            // Default tone if missing
+            if (!app.settings.tone) app.settings.tone = 'sarcastic';
         } else {
             // Default to Light Mode (User Request)
             app.settings.theme = 'light';
-            /* 
-            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                app.settings.theme = 'dark';
-            } 
-            */
+            app.settings.tone = 'sarcastic';
         }
 
         // Sync UI
@@ -48,12 +47,16 @@ const app = {
         const sEl = document.getElementById('in-sort');
         if (sEl) sEl.value = app.settings.sort || 'risk';
 
+        const tnEl = document.getElementById('in-tone');
+        if (tnEl) tnEl.value = app.settings.tone || 'sarcastic';
+
         const diff = new Date(app.config.semEndDate) - new Date();
         const daysLeft = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
         const stD = document.getElementById('st-days');
         if (stD) stD.innerText = daysLeft;
 
         app.applyTheme();
+        app.applyTone();
         app.setView(app.settings.view || 'card');
         ui.render(app.data, app.settings, app.config);
     },
@@ -61,7 +64,8 @@ const app = {
     save: () => {
         localStorage.setItem('arp_data_v3', JSON.stringify(app.data));
         localStorage.setItem('arp_settings_v3', JSON.stringify(app.settings));
-        ui.render(app.data, app.settings, app.config);
+        // Tone is static, so we might not need to re-render entire list every save 
+        // unless tone changed. But ui.render handles content updates.
     },
 
     toggleTheme: () => {
@@ -80,6 +84,41 @@ const app = {
         }
     },
 
+    setTone: (level) => {
+        app.settings.tone = level;
+        app.applyTone();
+        app.save();
+        ui.render(app.data, app.settings, app.config);
+    },
+
+    applyTone: () => {
+        const t = app.settings.tone || 'sarcastic';
+
+        // Static UI Updates
+        const map = {
+            'title-import': 'modalImport',
+            'btn-import': 'btnImport',
+            'title-settings': 'modalSettings',
+            'btn-save': 'btnSave',
+            'btn-del': 'btnDelete',
+            'btn-reset': 'resetConfirm' // Actually this is usually just "Reset All Data" on button
+        };
+
+        // Update elements if they exist
+        if (document.getElementById('title-import')) document.getElementById('title-import').innerText = Tone.get('modalImport', t);
+        if (document.getElementById('btn-import')) document.getElementById('btn-import').innerText = Tone.get('btnImport', t);
+        if (document.getElementById('title-settings')) document.getElementById('title-settings').innerText = Tone.get('modalSettings', t);
+        if (document.getElementById('btn-save')) document.getElementById('btn-save').innerText = Tone.get('btnSave', t);
+        if (document.getElementById('btn-del')) document.getElementById('btn-del').innerText = Tone.get('btnDelete', t);
+
+        // Placeholder updates
+        if (document.getElementById('in-import')) document.getElementById('in-import').placeholder = Tone.get('importPlaceholder', t);
+
+        // Reset button text specifically
+        const btnReset = document.getElementById('btn-reset');
+        if (btnReset) btnReset.innerText = t === 'professional' ? "Reset All Data" : (t === 'unhinged' ? "Nuke Everything" : "Reset Data");
+    },
+
     setTarget: (v) => {
         app.settings.target = parseInt(v);
         const l = document.getElementById('lbl-target');
@@ -87,11 +126,13 @@ const app = {
         const s = document.getElementById('st-target');
         if (s) s.innerText = v + '%';
         app.save();
+        ui.render(app.data, app.settings, app.config);
     },
 
     setSort: (v) => {
         app.settings.sort = v;
         app.save();
+        ui.render(app.data, app.settings, app.config);
     },
 
     setView: (mode) => {
@@ -113,20 +154,25 @@ const app = {
     },
 
     // CRUD
+
+    // CRUD
+
     prepareEdit: (id) => {
         const isEdit = id !== null;
         document.getElementById('in-id').value = id || '';
         document.getElementById('btn-del').style.display = isEdit ? 'block' : 'none';
 
+        const t = app.settings.tone || 'sarcastic';
+
         if (isEdit) {
             const sub = app.data.find(s => s.id == id);
-            document.getElementById('add-title').innerText = 'Edit Subject';
+            document.getElementById('add-title').innerText = Tone.get('modalEdit', t);
             document.getElementById('in-name').value = sub.name;
             document.getElementById('in-code').value = sub.code;
             document.getElementById('in-total').value = sub.total;
             document.getElementById('in-present').value = sub.present;
         } else {
-            document.getElementById('add-title').innerText = 'Add Subject';
+            document.getElementById('add-title').innerText = Tone.get('modalAdd', t);
             document.getElementById('in-name').value = '';
             document.getElementById('in-code').value = '';
             document.getElementById('in-total').value = '';
@@ -161,7 +207,8 @@ const app = {
 
     deleteSubject: () => {
         const id = document.getElementById('in-id').value;
-        if (confirm("Are you sure you want to drop this subject from reality?")) {
+        const msg = Tone.get('deleteConfirm', app.settings.tone);
+        if (confirm(msg)) {
             app.data = app.data.filter(s => s.id != id);
             app.save();
             ui.close();
@@ -225,7 +272,8 @@ const app = {
     },
 
     reset: () => {
-        if (confirm("Nuclear Option: Wipe all data? This cannot be undone.")) {
+        const msg = Tone.get('resetConfirm', app.settings.tone);
+        if (confirm(msg)) {
             app.data = [];
             app.save();
             ui.close();

@@ -119,18 +119,18 @@
     <div class="sheet-overlay" id="sh-add">
         <div class="sheet">
             <div class="sheet-header">
-                <h3 class="sheet-title" id="add-title">Add Subject</h3>
-                <button class="btn-text" onclick="ui.close()">Cancel</button>
+                <h3 class="sheet-title" id="add-title">Manifest Destiny (Add Subject)</h3>
+                <button class="btn-text" onclick="ui.close()">Abort</button>
             </div>
             <input type="hidden" id="in-id">
             <div class="form-group">
                 <label class="label">Subject Name</label>
-                <input type="text" class="input" id="in-name" placeholder="E.g., Operating Systems">
+                <input type="text" class="input" id="in-name" placeholder="E.g., Intro to Napping">
             </div>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
                 <div class="form-group">
                     <label class="label">Code</label>
-                    <input type="text" class="input" id="in-code" placeholder="CS101">
+                    <input type="text" class="input" id="in-code" placeholder="NAP101">
                 </div>
                 <div class="form-group">
                     <label class="label">Total Classes</label>
@@ -141,9 +141,9 @@
                 <label class="label">Attended Classes</label>
                 <input type="number" class="input" id="in-present" placeholder="0">
             </div>
-            <button class="btn btn-brand" onclick="app.saveSubject()">Save Subject</button>
+            <button class="btn btn-brand" onclick="app.saveSubject()" id="btn-save">Commit to Database</button>
             <button id="btn-del" class="btn btn-text" style="color:var(--danger); display:none"
-                onclick="app.deleteSubject()">Delete Subject</button>
+                onclick="app.deleteSubject()">Expunge Record</button>
         </div>
     </div>
 
@@ -151,15 +151,15 @@
     <div class="sheet-overlay" id="sh-import">
         <div class="sheet">
             <div class="sheet-header">
-                <h3 class="sheet-title">Import Data</h3>
+                <h3 class="sheet-title" id="title-import">Mass Ingestion (Import)</h3>
                 <button class="btn-text" onclick="ui.close()">Close</button>
             </div>
             <div class="form-group">
                 <label class="label">Paste Portal Data</label>
                 <textarea class="input" id="in-import" rows="6"
-                    placeholder="Select table content > Copy > Paste here"></textarea>
+                    placeholder="Dump your portal table here. We'll handle the parsing trauma."></textarea>
             </div>
-            <button class="btn btn-brand" onclick="app.processImport()">Parse & Import</button>
+            <button class="btn btn-brand" onclick="app.processImport()" id="btn-import">Process & Pray</button>
         </div>
     </div>
 
@@ -167,8 +167,17 @@
     <div class="sheet-overlay" id="sh-settings">
         <div class="sheet">
             <div class="sheet-header">
-                <h3 class="sheet-title">Preferences</h3>
+                <h3 class="sheet-title" id="title-settings">The Laws of Physics (Settings)</h3>
                 <button class="btn-text" onclick="ui.close()">Done</button>
+            </div>
+
+            <div class="form-group">
+                <label class="label">Roast Level</label>
+                <select class="input" id="in-tone" onchange="app.setTone(this.value)">
+                    <option value="professional">Professional (Default)</option>
+                    <option value="sarcastic">Sarcastic (Original)</option>
+                    <option value="unhinged">Unhinged (Roast Me)</option>
+                </select>
             </div>
 
             <div class="form-group">
@@ -191,7 +200,8 @@
             </div>
 
             <div style="margin-top:30px; border-top:1px solid var(--border); padding-top:20px;">
-                <button class="btn btn-text" style="color:var(--danger)" onclick="app.reset()">Reset All Data</button>
+                <button class="btn btn-text" style="color:var(--danger)" onclick="app.reset()" id="btn-reset">Reset All
+                    Data</button>
             </div>
         </div>
     </div>
