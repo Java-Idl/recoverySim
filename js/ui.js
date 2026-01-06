@@ -102,10 +102,12 @@ export const ui = {
                 status = `<div class="status-badge st-danger">Optimistic Max: ${stats.max.toFixed(1)}%</div>`;
                 barGradient = 'var(--brand)'; // Magenta
             } else if (stats.isDanger) {
-                status = `<div class="status-badge st-danger">Requirement: ${stats.needed} (No Skips)</div>`;
+                status = `<div class="status-badge st-danger">Requirement: ${stats.needed} (No Skips)</div>
+                          ${stats.safeSkips > 0 ? `<div class="status-badge st-success" style="margin-left:4px">Potential: ${stats.safeSkips}</div>` : ''}`;
                 barGradient = 'var(--brand)'; // Magenta
             } else {
-                status = `<div class="status-badge st-success">Bunk Budget: ${stats.buffer}</div>`;
+                status = `<div class="status-badge st-success" title="Consecutive safe skips">Bunk Budget: ${stats.buffer}</div>
+                          <div class="status-badge st-success" style="margin-left:4px; opacity:0.8" title="Total skips possible by semester end">Total Safe: ${stats.safeSkips}</div>`;
                 barGradient = 'var(--accent)'; // Teal
             }
 
