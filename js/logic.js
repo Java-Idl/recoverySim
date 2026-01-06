@@ -7,8 +7,12 @@ export const Logic = {
         return day;
     },
     getFutureClasses: (code, config) => {
-        const codeKey = code.match(/\d{3}/)?.[0];
-        if (!codeKey) return []; // Or handle gracefully
+        if (!code || !config || !config.weeklySchedule) return [];
+
+        const codeKeyMatch = code.match(/\d{3}/);
+        const codeKey = codeKeyMatch ? codeKeyMatch[0] : null;
+
+        if (!codeKey) return [];
 
         let classes = [];
         let cursor = new Date();
@@ -23,7 +27,8 @@ export const Logic = {
         while (cursor <= end) {
             const day = Logic.getEffectiveDay(cursor, config);
             if (day && config.weeklySchedule[day]) {
-                const match = Object.keys(config.weeklySchedule[day]).find(k => codeKey.includes(k));
+                // Find key that contains our codeKey (e.g. "384" in "20CYS384")
+                const match = Object.keys(config.weeklySchedule[day]).find(k => codeKey.includes(k) || k.includes(codeKey));
                 if (match) {
                     const count = config.weeklySchedule[day][match];
                     for (let i = 0; i < count; i++) classes.push(cursor.toISOString().split('T')[0]);

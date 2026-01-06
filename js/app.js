@@ -197,6 +197,7 @@ const app = {
             app.data.push(sub);
         }
         app.save();
+        ui.render(app.data, app.settings, app.config);
         ui.close();
         if (app.currId == sub.id) {
             ui.close(); // Close Viz if open
@@ -211,6 +212,7 @@ const app = {
         if (confirm(msg)) {
             app.data = app.data.filter(s => s.id != id);
             app.save();
+            ui.render(app.data, app.settings, app.config);
             ui.close();
         }
     },
@@ -265,6 +267,7 @@ const app = {
         if (newData.length) {
             app.data = newData;
             app.save();
+            ui.render(app.data, app.settings, app.config);
             ui.close();
         } else {
             alert("No recognizable data found. Ensure you copy the 'Total | Present' columns.");
@@ -276,50 +279,64 @@ const app = {
         if (confirm(msg)) {
             app.data = [];
             app.save();
+            ui.render(app.data, app.settings, app.config);
             ui.close();
         }
     },
 
     // Viz
     openViz: (id) => {
-        app.currId = id;
-        const sub = app.data.find(s => s.id == id);
-        if (!sub) return;
+        try {
+            app.currId = id;
+            const sub = app.data.find(s => s.id == id);
+            if (!sub) return;
 
-        document.getElementById('viz-title').innerText = sub.name;
-        // Use injected config
-        const dates = Logic.getFutureClasses(sub.code, app.config);
-        app.vizState = new Array(dates.length).fill(1);
+            document.getElementById('viz-title').innerText = sub.name;
 
-        const cont = document.getElementById('viz-container');
-        cont.innerHTML = '';
+            // Safety check for config
+            if (!app.config || !app.config.weeklySchedule) {
+                console.warn("Config not loaded, cannot calculate future classes");
+                alert("Calendar data missing. Please check config.json.");
+                return;
+            }
 
-        if (dates.length === 0) {
-            cont.innerHTML = '<span style="color:var(--text-muted); font-size:0.9rem; padding:0 20px; width:100%; text-align:center;">No scheduled classes remaining.</span>';
+            // Use injected config
+            const dates = Logic.getFutureClasses(sub.code, app.config);
+            app.vizState = new Array(dates.length).fill(1);
+
+            const cont = document.getElementById('viz-container');
+            cont.innerHTML = '';
+
+            if (dates.length === 0) {
+                cont.innerHTML = '<span style="color:var(--text-muted); font-size:0.9rem; padding:0 20px; width:100%; text-align:center;">No scheduled classes remaining.</span>';
+            }
+
+            const frag = document.createDocumentFragment();
+
+            dates.forEach((dStr, i) => {
+                const d = new Date(dStr);
+                const card = document.createElement('div');
+                card.className = 'day-card attend';
+                card.innerHTML = `
+                    <div class="day-header">${d.toLocaleDateString('en-US', { weekday: 'short' })}</div>
+                    <div class="day-body"></div>
+                `;
+
+                card.onclick = () => {
+                    app.vizState[i] = app.vizState[i] ? 0 : 1;
+                    card.className = app.vizState[i] ? 'day-card attend' : 'day-card miss';
+                    app.updateVizStats();
+                };
+                frag.appendChild(card);
+            });
+
+            cont.appendChild(frag);
+            app.updateVizStats();
+            ui.sheet('viz');
+        } catch (e) {
+            console.error("Error opening viz:", e);
+            alert("Could not open timeline. Please check console for details.");
         }
-
-        const frag = document.createDocumentFragment();
-
-        dates.forEach((dStr, i) => {
-            const d = new Date(dStr);
-            const card = document.createElement('div');
-            card.className = 'day-card attend';
-            card.innerHTML = `
-                <div class="day-header">${d.toLocaleDateString('en-US', { weekday: 'short' })}</div>
-                <div class="day-body"></div>
-            `;
-
-            card.onclick = () => {
-                app.vizState[i] = app.vizState[i] ? 0 : 1;
-                card.className = app.vizState[i] ? 'day-card attend' : 'day-card miss';
-                app.updateVizStats();
-            };
-            frag.appendChild(card);
-        });
-
-        cont.appendChild(frag);
-        app.updateVizStats();
-        ui.sheet('viz');
     },
 
     updateVizStats: () => {
