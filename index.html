@@ -168,6 +168,14 @@
                 <button class="btn-text" onclick="ui.close()">Close</button>
             </div>
             <div class="form-group">
+                <label class="label">Select Department</label>
+                <select class="input" id="in-department" onchange="app.setCurrentDepartment(this.value)">
+                    <option value="cys">Cyber Security (CYS)</option>
+                    <option value="mech">Mechanical Engineering (MECH)</option>
+                    <option value="cce">Computer Communication Engineering (CCE)</option>
+                </select>
+            </div>
+            <div class="form-group">
                 <label class="label">Paste Portal Data</label>
                 <textarea class="input" id="in-import" rows="6"
                     placeholder="Dump your portal table here. We'll handle the parsing trauma."></textarea>
