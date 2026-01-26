@@ -49,6 +49,19 @@
             </div>
         </div>
 
+        <div class="health-cert-toggle">
+            <div class="health-cert-content">
+                <div>
+                    <span class="health-cert-label">Health Certificate</span>
+                    <p class="health-cert-desc">Reduces minimum attendance to 65%</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="in-health-cert" onchange="app.toggleHealthCert(this.checked)">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+
         <div class="view-switcher">
             <button class="view-btn" onclick="app.setView('card')" title="Card View" id="btn-view-card">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -178,15 +191,6 @@
                     <option value="sarcastic">Sarcastic (Original)</option>
                     <option value="unhinged">Unhinged (Roast Me)</option>
                 </select>
-            </div>
-
-            <div class="form-group">
-                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                    <label class="label" style="margin:0">Target Goal</label>
-                    <span style="font-weight:800; color:var(--brand)" id="lbl-target">75%</span>
-                </div>
-                <input type="range" style="width:100%; accent-color:var(--brand)" min="50" max="100" value="75"
-                    id="in-target" oninput="app.setTarget(this.value)">
             </div>
 
             <div class="form-group">

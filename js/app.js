@@ -5,7 +5,7 @@ import { Tone } from './tone.js';
 /* --- APPLICATION STATE --- */
 const app = {
     data: [],
-    settings: { target: 75, theme: 'light', sort: 'risk', tone: 'sarcastic' },
+    settings: { target: 75, theme: 'light', sort: 'risk', tone: 'sarcastic', healthCert: false },
     vizState: [],
     currId: null,
     config: null, // Will be loaded from JSON
@@ -49,6 +49,9 @@ const app = {
 
         const tnEl = document.getElementById('in-tone');
         if (tnEl) tnEl.value = app.settings.tone || 'professional';
+
+        const hcEl = document.getElementById('in-health-cert');
+        if (hcEl) hcEl.checked = app.settings.healthCert || false;
 
         const diff = new Date(app.config.semEndDate) - new Date();
         const daysLeft = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
@@ -124,9 +127,21 @@ const app = {
         const l = document.getElementById('lbl-target');
         if (l) l.innerText = v + '%';
         const s = document.getElementById('st-target');
-        if (s) s.innerText = v + '%';
+        if (s) s.innerText = app.getEffectiveTarget() + '%';
         app.save();
         ui.render(app.data, app.settings, app.config);
+    },
+
+    toggleHealthCert: (checked) => {
+        app.settings.healthCert = checked;
+        const s = document.getElementById('st-target');
+        if (s) s.innerText = app.getEffectiveTarget() + '%';
+        app.save();
+        ui.render(app.data, app.settings, app.config);
+    },
+
+    getEffectiveTarget: () => {
+        return app.settings.healthCert ? 65 : app.settings.target;
     },
 
     setSort: (v) => {
@@ -352,7 +367,8 @@ const app = {
         pEl.innerText = proj.toFixed(1) + '%';
 
         // Use Bauhaus vars
-        pEl.style.color = proj >= app.settings.target ? 'var(--color-blue)' : 'var(--color-red)';
+        const effectiveTarget = app.getEffectiveTarget();
+        pEl.style.color = proj >= effectiveTarget ? 'var(--color-blue)' : 'var(--color-red)';
     },
 
     editFromViz: () => {
