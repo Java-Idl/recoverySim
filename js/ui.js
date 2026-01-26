@@ -44,12 +44,13 @@ export const ui = {
 
         // Sorting Logic
         const sort = settings.sort || 'risk';
+        const effectiveTarget = window.app ? window.app.getEffectiveTarget() : settings.target;
         const sorted = [...data].sort((a, b) => {
             const pA = a.present / a.total, pB = b.present / b.total;
             const futA = Logic.getFutureClasses(a.code, config).length;
             const futB = Logic.getFutureClasses(b.code, config).length;
-            const statA = Logic.calc(a.present, a.total, futA, settings.target);
-            const statB = Logic.calc(b.present, b.total, futB, settings.target);
+            const statA = Logic.calc(a.present, a.total, futA, effectiveTarget);
+            const statB = Logic.calc(b.present, b.total, futB, effectiveTarget);
 
             if (sort === 'risk') {
                 if (statA.isImpossible && !statB.isImpossible) return -1;
@@ -70,7 +71,7 @@ export const ui = {
         sorted.forEach(sub => {
             totalP += sub.present; totalT += sub.total;
             const fut = Logic.getFutureClasses(sub.code, config).length;
-            const stats = Logic.calc(sub.present, sub.total, fut, settings.target);
+            const stats = Logic.calc(sub.present, sub.total, fut, effectiveTarget);
 
             const card = document.createElement('div');
             card.className = 'card';
@@ -105,7 +106,7 @@ export const ui = {
                         <h3 class="sub-title">${escapeHtml(sub.name)}</h3>
                         <span class="sub-code">${escapeHtml(sub.code)}</span>
                     </div>
-                    <div class="pct-val" style="color:${stats.curr < settings.target ? 'var(--brand)' : 'var(--accent)'}; text-align:right;">
+                    <div class="pct-val" style="color:${stats.curr < effectiveTarget ? 'var(--brand)' : 'var(--accent)'}; text-align:right;">
                         ${stats.curr.toFixed(0)}<span class="pct-symbol">%</span>
                         <span class="sub-ratio">${sub.present} / ${sub.total}</span>
                     </div>
@@ -129,7 +130,7 @@ export const ui = {
         const ovrEl = document.getElementById('st-overall');
         if (ovrEl) {
             ovrEl.innerText = ovr.toFixed(1) + '%';
-            ovrEl.style.color = ovr < settings.target ? 'var(--brand)' : 'var(--accent)';
+            ovrEl.style.color = ovr < effectiveTarget ? 'var(--brand)' : 'var(--accent)';
         }
     }
 };
