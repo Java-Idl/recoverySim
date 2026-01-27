@@ -62,6 +62,20 @@
             </div>
         </div>
 
+        <div class="target-input-bar">
+            <div class="target-input-content">
+                <div>
+                    <span class="target-input-label">Target Attendance</span>
+                    <p class="target-input-desc">Set your minimum required attendance %</p>
+                </div>
+                <div class="target-input-controls">
+                    <input type="number" id="in-target" min="1" max="100" value="75" class="target-input-field"
+                        oninput="app.updateTarget(this.value)">
+                    <span class="target-percentage">%</span>
+                </div>
+            </div>
+        </div>
+
         <div class="view-switcher">
             <button class="view-btn" onclick="app.setView('card')" title="Card View" id="btn-view-card">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

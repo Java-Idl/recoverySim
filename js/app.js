@@ -138,6 +138,17 @@ const app = {
         ui.render(app.data, app.settings, app.config);
     },
 
+    updateTarget: (v) => {
+        const val = parseInt(v);
+        if (val >= 1 && val <= 100) {
+            app.settings.target = val;
+            const s = document.getElementById('st-target');
+            if (s) s.innerText = app.getEffectiveTarget() + '%';
+            app.save();
+            ui.render(app.data, app.settings, app.config);
+        }
+    },
+
     toggleHealthCert: (checked) => {
         app.settings.healthCert = checked;
         const s = document.getElementById('st-target');
