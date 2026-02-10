@@ -224,6 +224,68 @@ h1 {
     line-height: 1.3;
 }
 
+/* --- Target Input Bar --- */
+.target-input-bar {
+    background: var(--bg-surface);
+    padding: var(--space-md);
+    margin-bottom: var(--space-lg);
+    border-left: 4px solid var(--accent);
+}
+
+.target-input-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.target-input-label {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    display: block;
+    letter-spacing: 0.5px;
+    color: var(--text-main);
+}
+
+.target-input-desc {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin: 4px 0 0 0;
+    line-height: 1.3;
+}
+
+.target-input-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.target-input-field {
+    width: 80px;
+    padding: 10px 12px;
+    border: 2px solid var(--border-color);
+    background: var(--bg-body);
+    color: var(--text-main);
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-align: center;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.target-input-field:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--bg-surface);
+}
+
+.target-percentage {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
 /* --- Cards (Rectilinear & Flat) --- */
 .card {
     background: var(--bg-surface);

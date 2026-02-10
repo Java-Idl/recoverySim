@@ -8,6 +8,7 @@ const app = {
     settings: { target: 75, theme: 'light', sort: 'risk', tone: 'sarcastic', healthCert: false },
     vizState: [],
     currId: null,
+    currentDepartment: 'cys', // Default department
     config: null, // Will be loaded from JSON
 
     init: async () => {
@@ -23,6 +24,7 @@ const app = {
 
         const d = localStorage.getItem('arp_data_v3');
         const s = localStorage.getItem('arp_settings_v3');
+        const dept = localStorage.getItem('arp_department_v3');
         if (d) app.data = JSON.parse(d);
         if (s) {
             app.settings = JSON.parse(s);
@@ -33,6 +35,7 @@ const app = {
             app.settings.theme = 'light';
             app.settings.tone = 'professional';
         }
+        if (dept) app.currentDepartment = dept;
 
         // Sync UI
         const tEl = document.getElementById('in-target');
@@ -52,6 +55,9 @@ const app = {
 
         const hcEl = document.getElementById('in-health-cert');
         if (hcEl) hcEl.checked = app.settings.healthCert || false;
+
+        const deptEl = document.getElementById('in-department');
+        if (deptEl) deptEl.value = app.currentDepartment;
 
         const diff = new Date(app.config.semEndDate) - new Date();
         const daysLeft = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
@@ -132,6 +138,17 @@ const app = {
         ui.render(app.data, app.settings, app.config);
     },
 
+    updateTarget: (v) => {
+        const val = parseInt(v);
+        if (val >= 1 && val <= 100) {
+            app.settings.target = val;
+            const s = document.getElementById('st-target');
+            if (s) s.innerText = app.getEffectiveTarget() + '%';
+            app.save();
+            ui.render(app.data, app.settings, app.config);
+        }
+    },
+
     toggleHealthCert: (checked) => {
         app.settings.healthCert = checked;
         const s = document.getElementById('st-target');
@@ -148,6 +165,11 @@ const app = {
         app.settings.sort = v;
         app.save();
         ui.render(app.data, app.settings, app.config);
+    },
+
+    setCurrentDepartment: (dept) => {
+        app.currentDepartment = dept;
+        localStorage.setItem('arp_department_v3', dept);
     },
 
     setView: (mode) => {
@@ -237,6 +259,13 @@ const app = {
         const regex = /(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+(?:\.\d+)?)\s+(\d+)/g;
         let match, newData = [], lastIdx = 0;
 
+        // Get the department's weekly schedule from config
+        const deptConfig = app.config.departments[app.currentDepartment];
+        if (!deptConfig) {
+            alert("Error: Department configuration not found. Please select a valid department.");
+            return;
+        }
+
         while ((match = regex.exec(txt)) !== null) {
             const [_, t, p, dl] = match;
             let rawChunk = txt.substring(lastIdx, match.index).trim();
@@ -274,7 +303,8 @@ const app = {
                 id: Date.now() + Math.random(),
                 code, name,
                 total: parseInt(t),
-                present: parseInt(p) + parseInt(dl)
+                present: parseInt(p) + parseInt(dl),
+                department: app.currentDepartment
             });
             lastIdx = regex.lastIndex;
         }
@@ -282,6 +312,10 @@ const app = {
         if (newData.length) {
             app.data = newData;
             app.save();
+            // Update config to use selected department's weekly schedule
+            const configCopy = JSON.parse(JSON.stringify(app.config));
+            configCopy.weeklySchedule = deptConfig.weeklySchedule;
+            app.config = configCopy;
             ui.render(app.data, app.settings, app.config);
             ui.close();
         } else {
