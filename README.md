@@ -1,56 +1,47 @@
-# Attendance Recovery Planner (Viz Planner)
+# Attendance Recovery Planner
 
-This document outlines the technical logic and mathematical models used in the Attendance Recovery Planner. It is designed to provide developers with a clear understanding of how "Safe Skips", "Bunk Budgets", and "Risk Levels" are calculated.
+The Attendance Recovery Planner is a browser-based tool that helps students track their class attendance and figure out how many classes they need to attend to meet their goals. 
 
-## Core Concepts
+It calculates your current standing, tells you if you have room to miss a class, and projects your final attendance based on the remaining days in the semester.
 
-The application revolves around four key variables for each subject:
-- **P**: Present classes (attended so far)
-- **T**: Total classes (conducted so far)
-- **F**: Future classes (remaining in the semester)
-- **Target**: The minimum required attendance percentage (e.g., 75%)
+## Features
 
-These variables drive all derived metrics displayed in the UI.
+* **Progress Tracking:** View your current attendance percentage for all your subjects in one place.
+* **Safe Skips:** See exactly how many upcoming classes you can miss without dropping below your target percentage.
+* **Recovery Load:** If you are below your target, the app tells you exactly how many consecutive classes you need to attend to recover.
+* **Visual Projections:** Click on any subject to see a timeline of future classes and toggle them to see how missing a specific day affects your final percentage.
+* **Bulk Import:** Paste text directly from your student portal to automatically add all your subjects and current attendance numbers.
+* **Custom Targets:** Set your own attendance goals or toggle the health certificate option to automatically adjust the requirement.
 
-## Calculations
+## Setup and Usage
 
-### 1. Current Average
-The simple weighted average of attendance right now.
+This application runs entirely in your web browser. There is no server setup or installation required.
 
-> Current% = (P / T) * 100
+1.  Download or clone the repository to your computer.
+2.  Open the `index.html` file in any modern web browser.
+3.  Add subjects manually using the add button, or use the import tool to paste your data.
 
-*Note: If T=0, the result is 0.*
+## How the Calculations Work
 
-### 2. Optimistic Max (The "ceiling")
-The maximum possible attendance percentage achievable if the student attends **every single future class**.
+The app uses your current data and the semester schedule to calculate your status. It relies on four main numbers:
 
-> Max% = ((P + F) / (T + F)) * 100
+* **Present:** Classes you have attended.
+* **Total:** Classes that have happened so far.
+* **Future:** Classes remaining in the semester.
+* **Target:** The percentage you need to maintain.
 
-*Logic: If this value falls below the Target, it is mathematically impossible to recover without administrative intervention (triggers "Impossible" state).*
+Based on these numbers, the app determines:
 
-### 3. Bunk Budget (Consecutive Safe Skips)
-This metric answers: "How many *next* classes can I skip *right now* before my current average drops below the target?"
-
-> Buffer = floor( (P - (Target * T)) / Target )
-
-*Constraint: Buffer >= 0*
-
-### 4. Recovery Load (No Skips Requirement)
-If the student is currently below the target, this metric calculates how many *consecutive* classes they must attend to reach the target.
-
-> Needed = ceiling( ((Target * T) - P) / (1 - Target) )
-
-### 5. Total Safe Skips (Projected)
-This is a long-term metric. It answers: "How many total classes can I afford to miss over the *entire remainder of the semester* and still end up exactly on the target?"
-
-Unlike "Bunk Budget" (which is immediate), this accounts for the expanded denominator of the full semester.
-
-> SafeSkips = floor( (P + F) - (Target * (T + F)) )
-
-*Note: If SafeSkips < 0, it is clamped to 0.*
-
-## Logic Implementation
-These calculations are centralized in `js/logic.js` within the `Logic.calc(p, t, future, target)` function. This ensures that the UI (`js/ui.js`) and any other consumers always receive consistent derived state.
+* **Current Average:** (Present / Total) * 100
+* **Optimistic Max:** The highest possible percentage you can reach if you attend every single remaining class. If this number is lower than your target, the goal is unachievable.
+* **Buffer (Bunk Budget):** How many classes you can skip right now before your current average falls below the target.
+* **Needed (Recovery Load):** How many classes in a row you must attend to bring your current average back up to the target.
+* **Total Safe Skips:** How many total classes you can afford to miss over the rest of the semester and still finish exactly at your target.
 
 ## Configuration
-The "Future Classes" (**F**) are determined by iterating through dates from `now` until `semEndDate` (defined in `config.json`), checking against holidays.
+
+The application uses a `config.json` file to understand the semester timeline. You can edit this file to match your academic calendar:
+
+* `semEndDate`: The final date of classes for the semester.
+* `holidays`: A list of dates when classes will not be held.
+* `departments`: The weekly class schedule for different departments, mapping subject codes to the number of times they meet on a given day.
